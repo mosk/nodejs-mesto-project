@@ -1,2 +1,2 @@
-import { default as modelCard } from "./card";
-import { default as modelUser } from "./user";
+export { default as modelCard } from './card';
+export { default as modelUser } from './user';

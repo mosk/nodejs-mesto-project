@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const SCHEMA_USER = new mongoose.Schema({
   name: {
@@ -19,4 +19,4 @@ const SCHEMA_USER = new mongoose.Schema({
   },
 });
 
-export default mongoose.model("card", SCHEMA_USER);
+export default mongoose.model('card', SCHEMA_USER);

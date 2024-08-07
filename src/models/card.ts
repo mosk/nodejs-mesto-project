@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const SCHEMA_CARD = new mongoose.Schema({
   name: {
@@ -11,9 +11,9 @@ const SCHEMA_CARD = new mongoose.Schema({
     type: String,
     required: true,
   },
-  owner: "ObjectId, обязательное поле",
-  likes: "массив ObjectId, по умолчанию пустой",
-  createdAt: "дата создания, по умолчанию Date.now",
+  owner: 'ObjectId, обязательное поле',
+  likes: 'массив ObjectId, по умолчанию пустой',
+  createdAt: 'дата создания, по умолчанию Date.now',
 });
 
-export default mongoose.model("card", SCHEMA_CARD);
+export default mongoose.model('card', SCHEMA_CARD);
