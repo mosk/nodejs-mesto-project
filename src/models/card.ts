@@ -1,6 +1,7 @@
-import mongoose from 'mongoose';
+import { Schema, model } from 'mongoose';
+import { ICard } from './types';
 
-const SCHEMA_CARD = new mongoose.Schema({
+const SCHEMA_CARD = new Schema<ICard>({
   name: {
     type: String,
     required: true,
@@ -11,9 +12,21 @@ const SCHEMA_CARD = new mongoose.Schema({
     type: String,
     required: true,
   },
-  owner: 'ObjectId, обязательное поле',
-  likes: 'массив ObjectId, по умолчанию пустой',
-  createdAt: 'дата создания, по умолчанию Date.now',
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+    required: true,
+  },
+  likes: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'user',
+    },
+  ],
+  createdAt: {
+    type: Schema.Types.Date,
+    required: true,
+  },
 });
 
-export default mongoose.model('card', SCHEMA_CARD);
+export default model<ICard>('card', SCHEMA_CARD);
