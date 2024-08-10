@@ -16,3 +16,8 @@ export interface ICard {
   likes: Array<Types.ObjectId>,
   createdAt: Date,
 }
+
+export interface ICustomError {
+  code: number,
+  message: string
+}

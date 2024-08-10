@@ -11,7 +11,7 @@ const app = express();
 
 mongoose.connect(DB_MESTO);
 
-app.use(express.json()); // для собирания JSON-формата
+app.use(express.json());
 app.use(fakeAuth);
 app.use('/', routesUsers);
 app.use('/', routesCards);
