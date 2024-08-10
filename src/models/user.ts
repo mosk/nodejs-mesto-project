@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
-import { IUser } from './types';
+import { IUser } from '../types';
 
-const SCHEMA_USER = new Schema<IUser>({
+const User = new Schema<IUser>({
   name: {
     type: String,
     required: true,
@@ -20,4 +20,4 @@ const SCHEMA_USER = new Schema<IUser>({
   },
 });
 
-export default model<IUser>('user', SCHEMA_USER);
+export default model<IUser>('user', User);

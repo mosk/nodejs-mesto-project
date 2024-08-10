@@ -1,4 +1,7 @@
+import type { Request } from 'express';
 import { Types } from 'mongoose';
+
+export type TRequestWithId = Request & Record<'user', Record<'_id', string>>
 
 export interface IUser {
   name: string,
