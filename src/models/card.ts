@@ -17,15 +17,14 @@ const Card = new Schema<ICard>({
     ref: 'user',
     required: true,
   },
-  likes: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'user',
-    },
-  ],
+  likes: {
+    type: [Schema.Types.ObjectId],
+    ref: 'user',
+    default: [],
+  },
   createdAt: {
-    type: Schema.Types.Date,
-    required: true,
+    type: Date,
+    default: Date.now,
   },
 });
 

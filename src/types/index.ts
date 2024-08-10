@@ -4,9 +4,11 @@ import { Types } from 'mongoose';
 export type TRequestWithId = Request & Record<'user', Record<'_id', string>>
 
 export interface IUser {
-  name: string,
-  about: string,
-  avatar: string,
+  name?: string,
+  about?: string,
+  avatar?: string,
+  email: string,
+  password: string
 }
 
 export interface ICard {
