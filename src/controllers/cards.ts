@@ -115,8 +115,9 @@ export const likeCard = (req: Request, res: Response) => {
 
       res.send(card);
     })
-    .catch((err) => res.status(500).send({
-      message: `Произошла ошибка: ${err.message}`,
+    .catch((err) => sendError(res, {
+      ...ERRORS.DEFAULT,
+      message: `${ERRORS.DEFAULT}: ${err.message}`,
     }));
 };
 
@@ -147,7 +148,8 @@ export const dislikeCard = (req: Request, res: Response) => {
 
       res.send(card);
     })
-    .catch((err) => res.status(500).send({
-      message: `Произошла ошибка: ${err.message}`,
+    .catch((err) => sendError(res, {
+      ...ERRORS.DEFAULT,
+      message: `${ERRORS.DEFAULT}: ${err.message}`,
     }));
 };
