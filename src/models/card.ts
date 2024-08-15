@@ -1,5 +1,5 @@
+import type { ICard } from 'types';
 import { Schema, model } from 'mongoose';
-import { ICard } from '../types';
 
 const Card = new Schema<ICard>({
   name: {
@@ -17,15 +17,14 @@ const Card = new Schema<ICard>({
     ref: 'user',
     required: true,
   },
-  likes: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'user',
-    },
-  ],
+  likes: {
+    type: [Schema.Types.ObjectId],
+    ref: 'user',
+    default: [],
+  },
   createdAt: {
-    type: Schema.Types.Date,
-    required: true,
+    type: Date,
+    default: Date.now,
   },
 });
 

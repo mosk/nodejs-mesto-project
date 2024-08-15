@@ -3,7 +3,7 @@ import { ROUTE } from './consts';
 import {
   getAllUsers,
   getUser,
-  createUser,
+  getUserProfile,
   updateUserProfile,
   updateUserAvatar,
 } from '../controllers/users';
@@ -11,8 +11,8 @@ import {
 const router = Router();
 
 router.get(ROUTE.USER, getUser);
+router.get(ROUTE.USER_PROFILE, getUserProfile);
 router.get(ROUTE.USERS, getAllUsers);
-router.post(ROUTE.USERS, createUser);
 router.patch(ROUTE.USER_PROFILE, updateUserProfile);
 router.patch(ROUTE.USER_AVATAR, updateUserAvatar);
 

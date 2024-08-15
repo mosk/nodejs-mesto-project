@@ -7,4 +7,6 @@ export const ROUTE = {
   CARD: '/cards/:cardId',
   CARD_LIKE: '/cards/:cardId/likes',
   CARDS: '/cards',
+  SIGN_UP: '/signup',
+  SIGN_IN: '/signin',
 };

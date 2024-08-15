@@ -1,11 +1,36 @@
 import type { Request, Response } from 'express';
 import type { TRequestWithId, IUser } from 'types';
+
 import mongoose from 'mongoose';
+import { sendError } from '../helpers';
 import ERRORS from '../consts/errors';
-import { sendError } from '../helpers/sendError';
+
 import { User } from '../models';
 
 export const getUser = (req: Request, res: Response) => {
+  const { userId } = req.params;
+
+  if (!mongoose.isValidObjectId(userId)) {
+    sendError(res, ERRORS.INCORRECT_USER_ID);
+    return;
+  }
+
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        sendError(res, ERRORS.NOT_FOUND_USER);
+        return;
+      }
+
+      res.send(user);
+    })
+    .catch((err) => sendError(res, {
+      ...ERRORS.DEFAULT,
+      message: `${ERRORS.DEFAULT}: ${err.message}`,
+    }));
+};
+
+export const getUserProfile = (req: Request, res: Response) => {
   const { userId } = req.params;
 
   if (!mongoose.isValidObjectId(userId)) {
@@ -37,41 +62,15 @@ export const getAllUsers = (req: Request, res: Response) => {
     }));
 };
 
-export const createUser = (req: Request, res: Response) => {
-  const { name, about, avatar }: IUser = req.body;
-
-  if (name.length || about.length || avatar.length) {
-    sendError(res, ERRORS.INCORRECT_DATA);
-    return;
-  }
-
-  User.create({ name, about, avatar })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        sendError(res, {
-          ...ERRORS.INCORRECT_DATA,
-          message: `${ERRORS.INCORRECT_DATA}: ${err.message}`,
-        });
-      } else {
-        sendError(res, {
-          ...ERRORS.DEFAULT,
-          message: `${ERRORS.DEFAULT}: ${err.message}`,
-        });
-      }
-    });
-};
-
 export const updateUserProfile = (req: Request, res: Response) => {
-  const id = (req as TRequestWithId).user._id;
-  const { name, about }: Omit<IUser, 'avatar'> = req.body;
+  const { id, name, about }: Omit<IUser, 'avatar'> & {id: string} = req.body;
 
   if (!mongoose.isValidObjectId(id)) {
     sendError(res, ERRORS.INCORRECT_USER_ID);
     return;
   }
 
-  if (name.length || about.length) {
+  if (name?.length || about?.length) {
     sendError(res, ERRORS.INCORRECT_DATA);
     return;
   }
@@ -117,7 +116,7 @@ export const updateUserAvatar = (req: Request, res: Response) => {
     return;
   }
 
-  if (avatar.length) {
+  if (avatar?.length) {
     sendError(res, ERRORS.INCORRECT_DATA);
     return;
   }

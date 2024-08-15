@@ -1,7 +1,8 @@
 import type { Response } from 'express';
-import type { ICustomError } from '../types';
+import type { ICustomError } from 'types';
 
-// eslint-disable-next-line import/prefer-default-export
+export const extractBearerToken = (v: string) => v.replace('Bearer ', '');
+
 export const sendError = (res: Response, { code, message }: ICustomError) => (
   res.status(code).send({ message })
 );
