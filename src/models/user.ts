@@ -1,5 +1,7 @@
+import type { IUser, IUserModel } from 'types';
 import { Schema, model } from 'mongoose';
-import { IUser } from '../types';
+import { isEmail, isURL } from 'validator';
+import bcrypt from 'bcryptjs';
 
 const User = new Schema<IUser>({
   name: {
@@ -20,15 +22,37 @@ const User = new Schema<IUser>({
     type: String,
     required: true,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator: (v: string) => isURL(v),
+      message: 'Некорректная ссылка для аватара',
+    },
   },
   email: {
     type: String,
     required: true,
+    unique: true,
+    validate: {
+      validator: (v: string) => isEmail(v),
+      message: 'Email не соответствует схеме электронной почты',
+    },
   },
   password: {
     type: String,
     required: true,
+    select: false,
   },
 });
 
-export default model<IUser>('user', User);
+User.static('findUserByCredentials', async function findUserByCredentials({ email, password }: IUser) {
+  const user = await this.findOne({ email }).select('+password');
+
+  if (!user) return Promise.reject(new Error('Неправильные почта или пароль'));
+
+  const matched = await bcrypt.compare(password, user.password);
+
+  if (!matched) return Promise.reject(new Error('Неправильные почта или пароль'));
+
+  return user;
+});
+
+export default model<IUser, IUserModel>('user', User);

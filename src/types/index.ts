@@ -1,15 +1,9 @@
 import type { Request } from 'express';
-import { Types } from 'mongoose';
+import type { Types } from 'mongoose';
+
+export { IUser, IUserModel } from './user';
 
 export type TRequestWithId = Request & Record<'user', Record<'_id', string>>
-
-export interface IUser {
-  name?: string,
-  about?: string,
-  avatar?: string,
-  email: string,
-  password: string
-}
 
 export interface ICard {
   name: string,

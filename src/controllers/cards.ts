@@ -1,11 +1,13 @@
 import type { Request, Response } from 'express';
 import type { TRequestWithId, ICard } from 'types';
 import mongoose from 'mongoose';
-import { sendError } from '../helpers/sendError';
+import { sendError } from '../helpers';
 import ERRORS from '../consts/errors';
 import { Card } from '../models';
 
 export const getAllCards = (req: Request, res: Response) => {
+  console.log('Get all cards response');
+
   Card.find({})
     .then((cards) => res.send(cards))
     .catch((err) => sendError(res, {

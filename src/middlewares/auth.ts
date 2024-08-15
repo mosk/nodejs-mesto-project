@@ -1,13 +1,26 @@
 import type { Request, Response, NextFunction } from 'express';
-import type { TRequestWithId } from '../types';
+import jwt from 'jsonwebtoken';
+import { COOKIE_NAME } from '../consts';
+import { extractBearerToken } from '../helpers';
+import getAppConfig from '../../config';
+
+const { secretKey } = getAppConfig();
 
 const auth = (req: Request, res: Response, next: NextFunction) => {
-  // fake auth
-  (req as TRequestWithId).user = {
-    _id: '66b52b51d66cdbae934287d9',
-  };
+  const cookie = req.cookies[COOKIE_NAME];
 
-  next();
+  if (!cookie) return next(new Error('Ошибка авторизации'));
+
+  const token = extractBearerToken(cookie);
+
+  try {
+    const payload = jwt.verify(token, secretKey);
+    res.locals.user = payload;
+  } catch (err) {
+    return next(new Error('Ошибка авторизации'));
+  }
+
+  return next();
 };
 
 export default auth;

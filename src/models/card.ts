@@ -1,5 +1,5 @@
+import type { ICard } from 'types';
 import { Schema, model } from 'mongoose';
-import { ICard } from '../types';
 
 const Card = new Schema<ICard>({
   name: {
