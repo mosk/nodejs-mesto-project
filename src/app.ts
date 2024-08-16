@@ -1,9 +1,11 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
+import { errors } from 'celebrate';
 import getAppConfig from '../config';
 import auth from './middlewares/auth';
 import { requestLogger, errorLogger } from './middlewares/logger';
+import { errorHandler } from './middlewares/errorHandler';
 import routesUsers from './routes/users';
 import routesCards from './routes/cards';
 import routesAuth from './routes/auth';
@@ -24,6 +26,7 @@ app.use('/', routesUsers);
 app.use('/', routesCards);
 
 app.use(errorLogger);
+app.use(errors());
 // errors handler
 
 app.listen(port);
