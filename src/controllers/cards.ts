@@ -1,58 +1,49 @@
-import type { Request, Response } from 'express';
-import type { TRequestWithId, ICard } from 'types';
-import mongoose from 'mongoose';
-import { sendError } from '../helpers';
-import ERRORS from '../consts/errors';
-import { Card } from '../models';
+import type { NextFunction, Request, Response } from "express";
+import type { ICard } from "types";
 
-export const getAllCards = (req: Request, res: Response) => {
-  console.log('Get all cards response');
+import mongoose from "mongoose";
+import { ERROR_MSG } from "../consts";
+import { ErrorNotFound, ErrorResData } from "errors";
 
-  Card.find({})
-    .then((cards) => res.send(cards))
-    .catch((err) => sendError(res, {
-      ...ERRORS.DEFAULT,
-      message: `${ERRORS.DEFAULT}: ${err.message}`,
-    }));
+import { Card } from "../models";
+
+export const getAllCards = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const cards = await Card.find({});
+    res.send(cards);
+  } catch (err) {
+    next(err);
+  }
 };
 
-export const deleteCard = (req: Request, res: Response) => {
-  const { cardId } = req.params;
+export const deleteCard = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { cardId } = req.body;
 
-  if (!mongoose.isValidObjectId(cardId)) {
-    sendError(res, ERRORS.INCORRECT_CARD_ID);
-    return;
+  if (!mongoose.isValidObjectId(cardId))
+    next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
+
+  try {
+    const card = await Card.findByIdAndDelete(cardId);
+
+    if (!card) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_CARD);
+
+    res.send(card);
+  } catch (err) {
+    next(err);
   }
-
-  Card.findByIdAndDelete(cardId)
-    .then((card) => {
-      if (!card) {
-        sendError(res, ERRORS.NOT_FOUND_CARD);
-        return;
-      }
-
-      res.send(card);
-    })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        sendError(res, {
-          ...ERRORS.INCORRECT_DATA,
-          message: `${ERRORS.INCORRECT_DATA}: ${err.message}`,
-        });
-      } else {
-        sendError(res, {
-          ...ERRORS.DEFAULT,
-          message: `${ERRORS.DEFAULT}: ${err.message}`,
-        });
-      }
-    });
 };
 
 export const createCard = (req: Request, res: Response) => {
   const id = (req as TRequestWithId).user._id;
-  const {
-    name, link,
-  }: Pick<ICard, 'name' | 'link'> = req.body;
+  const { name, link }: Pick<ICard, "name" | "link"> = req.body;
 
   if (!mongoose.isValidObjectId(id)) {
     sendError(res, ERRORS.INCORRECT_USER_ID);
@@ -65,7 +56,11 @@ export const createCard = (req: Request, res: Response) => {
   }
 
   Card.create({
-    name, link, owner: id, likes: [], createdAt: Date.now(),
+    name,
+    link,
+    owner: id,
+    likes: [],
+    createdAt: Date.now(),
   })
     .then((card) => {
       if (!card) {
@@ -104,11 +99,7 @@ export const likeCard = (req: Request, res: Response) => {
     return;
   }
 
-  Card.findByIdAndUpdate(
-    cardId,
-    { $addToSet: { likes: id } },
-    { new: true },
-  )
+  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: id } }, { new: true })
     .then((card) => {
       if (!card) {
         sendError(res, ERRORS.INCORRECT_DATA);
@@ -117,10 +108,12 @@ export const likeCard = (req: Request, res: Response) => {
 
       res.send(card);
     })
-    .catch((err) => sendError(res, {
-      ...ERRORS.DEFAULT,
-      message: `${ERRORS.DEFAULT}: ${err.message}`,
-    }));
+    .catch((err) =>
+      sendError(res, {
+        ...ERRORS.DEFAULT,
+        message: `${ERRORS.DEFAULT}: ${err.message}`,
+      })
+    );
 };
 
 export const dislikeCard = (req: Request, res: Response) => {
@@ -137,11 +130,7 @@ export const dislikeCard = (req: Request, res: Response) => {
     return;
   }
 
-  Card.findByIdAndUpdate(
-    cardId,
-    { $pull: { likes: id } },
-    { new: true },
-  )
+  Card.findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true })
     .then((card) => {
       if (!card) {
         sendError(res, ERRORS.INCORRECT_DATA);
@@ -150,8 +139,10 @@ export const dislikeCard = (req: Request, res: Response) => {
 
       res.send(card);
     })
-    .catch((err) => sendError(res, {
-      ...ERRORS.DEFAULT,
-      message: `${ERRORS.DEFAULT}: ${err.message}`,
-    }));
+    .catch((err) =>
+      sendError(res, {
+        ...ERRORS.DEFAULT,
+        message: `${ERRORS.DEFAULT}: ${err.message}`,
+      })
+    );
 };

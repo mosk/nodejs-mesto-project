@@ -1,12 +1,12 @@
-import { Router } from 'express';
-import { ROUTE } from './consts';
+import { Router } from "express";
+import { ROUTE } from "consts";
 import {
   getAllCards,
   deleteCard,
   createCard,
   likeCard,
   dislikeCard,
-} from '../controllers/cards';
+} from "../controllers/cards";
 
 const router = Router();
 

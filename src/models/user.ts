@@ -1,30 +1,33 @@
-import type { IUser, IUserModel } from 'types';
-import { Schema, model } from 'mongoose';
-import { isEmail, isURL } from 'validator';
-import bcrypt from 'bcryptjs';
+import type { IUser, IUserModel } from "types";
+import { Schema, model } from "mongoose";
+import { isEmail, isURL } from "validator";
+import bcrypt from "bcryptjs";
+import { ErrorAuth } from "errors";
+import { ERROR_MSG } from "consts";
 
-const User = new Schema<IUser>({
+const User = new Schema<IUser, IUserModel>({
   name: {
     type: String,
     required: true,
     minlength: 2,
     maxlength: 30,
-    default: 'Жак-Ив Кусто',
+    default: "Жак-Ив Кусто",
   },
   about: {
     type: String,
     required: true,
     minlength: 2,
     maxlength: 30,
-    default: 'Исследователь',
+    default: "Исследователь",
   },
   avatar: {
     type: String,
     required: true,
-    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    default:
+      "https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png",
     validate: {
       validator: (v: string) => isURL(v),
-      message: 'Некорректная ссылка для аватара',
+      message: "Некорректная ссылка для аватара",
     },
   },
   email: {
@@ -33,7 +36,7 @@ const User = new Schema<IUser>({
     unique: true,
     validate: {
       validator: (v: string) => isEmail(v),
-      message: 'Email не соответствует схеме электронной почты',
+      message: "Email не соответствует схеме электронной почты",
     },
   },
   password: {
@@ -43,16 +46,20 @@ const User = new Schema<IUser>({
   },
 });
 
-User.static('findUserByCredentials', async function findUserByCredentials({ email, password }: IUser) {
-  const user = await this.findOne({ email }).select('+password');
+User.static(
+  "findUserByCredentials",
+  async function findUserByCredentials({ email, password }: IUser) {
+    const user = await this.findOne({ email }).select("+password");
 
-  if (!user) return Promise.reject(new Error('Неправильные почта или пароль'));
+    if (!user) return Promise.reject(new ErrorAuth(ERROR_MSG.AUTH_WRONG_CREDS));
 
-  const matched = await bcrypt.compare(password, user.password);
+    const matched = await bcrypt.compare(password, user.password);
 
-  if (!matched) return Promise.reject(new Error('Неправильные почта или пароль'));
+    if (!matched)
+      return Promise.reject(new ErrorAuth(ERROR_MSG.AUTH_WRONG_CREDS));
 
-  return user;
-});
+    return user;
+  }
+);
 
-export default model<IUser, IUserModel>('user', User);
+export default model<IUser, IUserModel>("user", User);

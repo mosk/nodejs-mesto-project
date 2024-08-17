@@ -1,147 +1,128 @@
-import type { Request, Response } from 'express';
-import type { TRequestWithId, IUser } from 'types';
+import type { NextFunction, Request, Response } from "express";
+import type { IUser } from "types";
 
-import mongoose from 'mongoose';
-import { sendError } from '../helpers';
-import ERRORS from '../consts/errors';
+import mongoose from "mongoose";
+import { ERROR_MSG } from "../consts";
+import { ErrorNotFound, ErrorResData } from "errors";
 
-import { User } from '../models';
+import { User } from "../models";
 
-export const getUser = (req: Request, res: Response) => {
-  const { userId } = req.params;
+export const getUserById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId } = req.body;
 
-  if (!mongoose.isValidObjectId(userId)) {
-    sendError(res, ERRORS.INCORRECT_USER_ID);
-    return;
+  if (!mongoose.isValidObjectId(userId))
+    next(new ErrorResData(ERROR_MSG.BAD_USER_ID));
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_USER);
+
+    res.send(user);
+  } catch (err) {
+    next(err);
   }
-
-  User.findById(userId)
-    .then((user) => {
-      if (!user) {
-        sendError(res, ERRORS.NOT_FOUND_USER);
-        return;
-      }
-
-      res.send(user);
-    })
-    .catch((err) => sendError(res, {
-      ...ERRORS.DEFAULT,
-      message: `${ERRORS.DEFAULT}: ${err.message}`,
-    }));
 };
 
-export const getUserProfile = (req: Request, res: Response) => {
-  const { userId } = req.params;
+// TODO: чекнуть
+export const getUserCurrent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId } = req.body;
 
-  if (!mongoose.isValidObjectId(userId)) {
-    sendError(res, ERRORS.INCORRECT_USER_ID);
-    return;
+  if (!mongoose.isValidObjectId(userId))
+    next(new ErrorResData(ERROR_MSG.BAD_USER_ID));
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_USER);
+
+    res.send(user);
+  } catch (err) {
+    next(err);
   }
-
-  User.findById(userId)
-    .then((user) => {
-      if (!user) {
-        sendError(res, ERRORS.NOT_FOUND_USER);
-        return;
-      }
-
-      res.send(user);
-    })
-    .catch((err) => sendError(res, {
-      ...ERRORS.DEFAULT,
-      message: `${ERRORS.DEFAULT}: ${err.message}`,
-    }));
 };
 
-export const getAllUsers = (req: Request, res: Response) => {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => sendError(res, {
-      ...ERRORS.DEFAULT,
-      message: `${ERRORS.DEFAULT}: ${err.message}`,
-    }));
+export const getAllUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const users = await User.find({});
+    res.send(users);
+  } catch (err) {
+    next(err);
+  }
 };
 
-export const updateUserProfile = (req: Request, res: Response) => {
-  const { id, name, about }: Omit<IUser, 'avatar'> & {id: string} = req.body;
+export const updateUserProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const {
+    id: userId,
+    name,
+    about,
+  }: Omit<IUser, "avatar"> & { id: string } = req.body;
 
-  if (!mongoose.isValidObjectId(id)) {
-    sendError(res, ERRORS.INCORRECT_USER_ID);
-    return;
-  }
+  if (!mongoose.isValidObjectId(userId))
+    next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
 
-  if (name?.length || about?.length) {
-    sendError(res, ERRORS.INCORRECT_DATA);
-    return;
-  }
-
-  User.findByIdAndUpdate(
-    id,
-    {
-      name, about,
-    },
-    {
-      new: true,
-    },
-  )
-    .then((user) => {
-      if (!user) {
-        sendError(res, ERRORS.NOT_FOUND_USER);
-        return;
+  try {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        name,
+        about,
+      },
+      {
+        new: true,
       }
+    );
 
-      res.send(user);
-    })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        sendError(res, {
-          ...ERRORS.INCORRECT_DATA,
-          message: `${ERRORS.INCORRECT_DATA}: ${err.message}`,
-        });
-      } else {
-        sendError(res, {
-          ...ERRORS.DEFAULT,
-          message: `${ERRORS.DEFAULT}: ${err.message}`,
-        });
-      }
-    });
+    if (!user) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_USER);
+
+    res.send(user);
+  } catch (err) {
+    next(err);
+  }
 };
 
-export const updateUserAvatar = (req: Request, res: Response) => {
-  const id = (req as TRequestWithId).user._id;
-  const { avatar }: Pick<IUser, 'avatar'> = req.body;
+export const updateUserAvatar = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id: userId, avatar }: Pick<IUser, "avatar"> & { id: string } =
+    req.body;
 
-  if (!mongoose.isValidObjectId(id)) {
-    sendError(res, ERRORS.INCORRECT_USER_ID);
-    return;
-  }
+  if (!mongoose.isValidObjectId(userId))
+    next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
 
-  if (avatar?.length) {
-    sendError(res, ERRORS.INCORRECT_DATA);
-    return;
-  }
-
-  User.findByIdAndUpdate(
-    id,
-    {
-      avatar,
-    },
-    {
-      new: true,
-    },
-  )
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        sendError(res, {
-          ...ERRORS.INCORRECT_DATA,
-          message: `${ERRORS.INCORRECT_DATA}: ${err.message}`,
-        });
-      } else {
-        sendError(res, {
-          ...ERRORS.DEFAULT,
-          message: `${ERRORS.DEFAULT}: ${err.message}`,
-        });
+  try {
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        avatar,
+      },
+      {
+        new: true,
       }
-    });
+    );
+
+    if (!user) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_USER);
+
+    res.send(user);
+  } catch (err) {
+    next(err);
+  }
 };
