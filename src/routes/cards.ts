@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { ROUTE } from 'consts';
 import { celebrate } from 'celebrate';
-import { validateCardId, validateNewCard } from 'middlewares/validate';
+import { ROUTE } from '../consts';
+import { validateCardId, validateNewCard } from '../middlewares/validate';
 import {
   getAllCards,
   deleteCard,

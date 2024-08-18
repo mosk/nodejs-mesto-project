@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import type { ICard } from 'types';
 
 import mongoose from 'mongoose';
-import { ErrorForbidden, ErrorNotFound, ErrorResData } from 'errors';
+import { ErrorForbidden, ErrorNotFound, ErrorResData } from '../errors';
 import { ERROR_MSG } from '../consts';
 
 import { Card } from '../models';

@@ -2,9 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import type { IUser } from 'types';
 
 import mongoose from 'mongoose';
-import {
-  ErrorAuth, ErrorForbidden, ErrorNotFound, ErrorResData,
-} from 'errors';
+import { ErrorForbidden, ErrorNotFound, ErrorResData } from '../errors';
 import { ERROR_MSG } from '../consts';
 
 import { User } from '../models';

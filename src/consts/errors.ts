@@ -1,4 +1,4 @@
-export const ERROR_MSG: Record<string, string> = {
+const ERROR_MSG: Record<string, string> = {
   // 400
   BAD_USER_ID: 'Передан некорректный id пользователя',
   BAD_CARD_ID: 'Передан некорректный id карточки',
@@ -9,6 +9,7 @@ export const ERROR_MSG: Record<string, string> = {
   // 403
   FORBIDDEN: 'Так нельзя',
   // 404
+  NOT_FOUND: '«В жизни бывают моменты, когда зашел не в ту дверь...»',
   NOT_FOUND_USER: 'Пользователь по указанному _id не найден',
   NOT_FOUND_CARD: 'Карточка с указанным _id не найдена',
   // 409
@@ -16,3 +17,5 @@ export const ERROR_MSG: Record<string, string> = {
   // 500
   DEFAULT: 'На сервере произошла ошибка',
 };
+
+export default ERROR_MSG;

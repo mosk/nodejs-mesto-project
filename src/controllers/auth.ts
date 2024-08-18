@@ -3,7 +3,7 @@ import type { IUser } from 'types';
 
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { ErrorAlreadyExist } from 'errors';
+import { ErrorAlreadyExist } from '../errors';
 import { COOKIE_NAME, COOKIE_TIMEOUT, ERROR_MSG } from '../consts';
 
 import getAppConfig from '../../config';
@@ -22,7 +22,7 @@ export const login = async (
     const { _id } = await User.findUserByCredentials({ email, password });
     const token = jwt.sign({ _id }, secretKey, { expiresIn: COOKIE_TIMEOUT });
 
-    return res
+    res
       .cookie(COOKIE_NAME, token, {
         expires: new Date(Date.now() + COOKIE_TIMEOUT),
         httpOnly: true,
@@ -49,7 +49,7 @@ export const createUser = async (
       password: hash,
     });
 
-    return res.status(201).send({
+    res.status(201).send({
       name,
       email,
       avatar,

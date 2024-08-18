@@ -1,11 +1,11 @@
 import type { TCustomError } from 'types';
 import { NextFunction, Request, Response } from 'express';
-import mongoose, { MongooseError } from 'mongoose';
 
-export const errorHandler = (
+const errorHandler = (
   err: TCustomError,
   req: Request,
   res: Response,
+  // eslint-disable-next-line no-unused-vars
   next: NextFunction,
 ) => {
   const { statusCode: status = 500, message: msg } = err;
@@ -16,3 +16,5 @@ export const errorHandler = (
     message,
   });
 };
+
+export default errorHandler;

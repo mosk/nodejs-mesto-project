@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { ROUTE } from 'consts';
 import { celebrate } from 'celebrate';
+import { ROUTE } from '../consts';
 import {
   validateUpdateAvatar,
   validateUpdateProfile,
   validateUserId,
-} from 'middlewares/validate';
+} from '../middlewares/validate';
 import {
   getAllUsers,
   getUserById,

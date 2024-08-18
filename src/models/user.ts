@@ -2,8 +2,8 @@ import type { IUser, IUserModel } from 'types';
 import { Schema, model } from 'mongoose';
 import { isEmail, isURL } from 'validator';
 import bcrypt from 'bcryptjs';
-import { ErrorAuth } from 'errors';
-import { ERROR_MSG } from 'consts';
+import { ErrorAuth } from '../errors';
+import { ERROR_MSG } from '../consts';
 
 const User = new Schema<IUser, IUserModel>({
   name: {

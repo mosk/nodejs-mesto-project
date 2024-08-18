@@ -5,7 +5,7 @@ import {
   ErrorServer,
   ErrorAlreadyExist,
   ErrorForbidden,
-} from 'errors';
+} from '../errors';
 
 export type TCustomError =
   | ErrorAuth

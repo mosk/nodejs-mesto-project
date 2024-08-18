@@ -10,6 +10,8 @@ const { secretKey } = getAppConfig();
 const auth = (req: Request, res: Response, next: NextFunction) => {
   const cookie = req.cookies[COOKIE_NAME];
 
+  console.log('auth');
+
   if (!cookie) return next(new ErrorAuth('Ошибка авторизации'));
 
   const token = extractBearerToken(cookie);
