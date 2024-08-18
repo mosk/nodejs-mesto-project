@@ -1,4 +1,4 @@
-export default class ResDataError extends Error {
+export default class ReqDataError extends Error {
   public statusCode: number;
 
   constructor(message: string) {

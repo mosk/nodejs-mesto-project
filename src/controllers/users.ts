@@ -2,8 +2,8 @@ import type { NextFunction, Request, Response } from 'express';
 import type { IUser } from 'types';
 
 import mongoose from 'mongoose';
-import { ErrorForbidden, ErrorNotFound, ErrorResData } from '../errors';
-import { ERROR_MSG } from '../consts';
+import { ErrorNotFound, ErrorReqData } from '../errors';
+import { MESSAGE } from '../consts';
 
 import { User } from '../models';
 
@@ -13,16 +13,13 @@ export const getUserById = async (
   next: NextFunction,
 ) => {
   const { userId } = req.params;
-  const { _id: currentUserId } = res.locals.user;
 
-  if (userId !== currentUserId) next(new ErrorForbidden(ERROR_MSG.FORBIDDEN));
-
-  if (!mongoose.isValidObjectId(userId)) next(new ErrorResData(ERROR_MSG.BAD_USER_ID));
+  if (!mongoose.isValidObjectId(userId)) next(new ErrorReqData(MESSAGE.BAD_USER_ID));
 
   try {
     const user = await User.findById(userId);
 
-    if (!user) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_USER);
+    if (!user) throw new ErrorNotFound(MESSAGE.NOT_FOUND_USER);
 
     res.send(user);
   } catch (err) {
@@ -37,12 +34,12 @@ export const getUserCurrent = async (
 ) => {
   const { _id: userId } = res.locals.user;
 
-  if (!mongoose.isValidObjectId(userId)) next(new ErrorResData(ERROR_MSG.BAD_USER_ID));
+  if (!mongoose.isValidObjectId(userId)) next(new ErrorReqData(MESSAGE.BAD_USER_ID));
 
   try {
     const user = await User.findById(userId);
 
-    if (!user) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_USER);
+    if (!user) throw new ErrorNotFound(MESSAGE.NOT_FOUND_USER);
 
     res.send(user);
   } catch (err) {
@@ -71,7 +68,7 @@ export const updateUserProfile = async (
   const { name, about }: Omit<IUser, 'avatar'> = req.body;
   const { _id: userId } = res.locals.user;
 
-  if (!mongoose.isValidObjectId(userId)) next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
+  if (!mongoose.isValidObjectId(userId)) next(new ErrorReqData(MESSAGE.BAD_CARD_ID));
 
   try {
     const user = await User.findByIdAndUpdate(
@@ -85,11 +82,15 @@ export const updateUserProfile = async (
       },
     );
 
-    if (!user) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_USER);
+    if (!user) throw new ErrorNotFound(MESSAGE.NOT_FOUND_USER);
 
     res.send(user);
   } catch (err) {
-    next(err);
+    if ((err as Error).name === 'ValidationError') {
+      next(new ErrorReqData(MESSAGE.BAD_DATA));
+    } else {
+      next(err);
+    }
   }
 };
 
@@ -101,7 +102,7 @@ export const updateUserAvatar = async (
   const { avatar }: Pick<IUser, 'avatar'> = req.body;
   const { _id: userId } = res.locals.user;
 
-  if (!mongoose.isValidObjectId(userId)) next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
+  if (!mongoose.isValidObjectId(userId)) next(new ErrorReqData(MESSAGE.BAD_CARD_ID));
 
   try {
     const user = await User.findByIdAndUpdate(
@@ -114,10 +115,14 @@ export const updateUserAvatar = async (
       },
     );
 
-    if (!user) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_USER);
+    if (!user) throw new ErrorNotFound(MESSAGE.NOT_FOUND_USER);
 
     res.send(user);
   } catch (err) {
-    next(err);
+    if ((err as Error).name === 'ValidationError') {
+      next(new ErrorReqData(MESSAGE.BAD_DATA));
+    } else {
+      next(err);
+    }
   }
 };

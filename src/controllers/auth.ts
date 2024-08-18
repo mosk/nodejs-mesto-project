@@ -3,8 +3,8 @@ import type { IUser } from 'types';
 
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { ErrorAlreadyExist } from '../errors';
-import { COOKIE_NAME, COOKIE_TIMEOUT, ERROR_MSG } from '../consts';
+import { ErrorAlreadyExist, ErrorReqData } from '../errors';
+import { COOKIE_NAME, COOKIE_TIMEOUT, MESSAGE } from '../consts';
 
 import getAppConfig from '../../config';
 import { User } from '../models';
@@ -27,7 +27,7 @@ export const login = async (
         expires: new Date(Date.now() + COOKIE_TIMEOUT),
         httpOnly: true,
       })
-      .end();
+      .send(MESSAGE.SUCCESS_AUTH);
   } catch (err) {
     next(err);
   }
@@ -57,9 +57,11 @@ export const createUser = async (
     });
   } catch (err) {
     if ((err as Error & { code: number }).code === 11000) {
-      next(new ErrorAlreadyExist(ERROR_MSG.REG_EMAIL_ALREADY_EXIST));
+      next(new ErrorAlreadyExist(MESSAGE.REG_EMAIL_ALREADY_EXIST));
+    } else if ((err as Error).name === 'ValidationError') {
+      next(new ErrorReqData(MESSAGE.BAD_DATA));
+    } else {
+      next(err);
     }
-
-    next(err);
   }
 };

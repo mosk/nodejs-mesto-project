@@ -1,5 +1,5 @@
 export { ROUTE } from './routes';
-export { default as ERROR_MSG } from './errors';
+export { default as MESSAGE } from './messages';
 
 export const COOKIE_NAME = 'node-mesto-jwt';
 // 7 days in ms

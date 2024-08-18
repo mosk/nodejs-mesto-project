@@ -16,8 +16,8 @@ import {
 
 const router = Router();
 
-router.get(ROUTE.USER, celebrate(validateUserId), getUserById);
 router.get(ROUTE.USER_PROFILE, getUserCurrent);
+router.get(ROUTE.USER, celebrate(validateUserId), getUserById);
 router.get(ROUTE.USERS, getAllUsers);
 router.patch(
   ROUTE.USER_PROFILE,

@@ -2,8 +2,8 @@ import type { NextFunction, Request, Response } from 'express';
 import type { ICard } from 'types';
 
 import mongoose from 'mongoose';
-import { ErrorForbidden, ErrorNotFound, ErrorResData } from '../errors';
-import { ERROR_MSG } from '../consts';
+import { ErrorForbidden, ErrorNotFound, ErrorReqData } from '../errors';
+import { MESSAGE } from '../consts';
 
 import { Card } from '../models';
 
@@ -28,14 +28,14 @@ export const deleteCard = async (
   const { cardId } = req.params;
   const { _id: userId } = res.locals.user;
 
-  if (!mongoose.isValidObjectId(cardId)) next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
+  if (!mongoose.isValidObjectId(cardId)) next(new ErrorReqData(MESSAGE.BAD_CARD_ID));
 
   try {
     const card = await Card.findById(cardId);
 
-    if (!card) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_CARD);
+    if (!card) throw new ErrorNotFound(MESSAGE.NOT_FOUND_CARD);
 
-    if (userId !== card.owner) throw new ErrorForbidden(ERROR_MSG.FORBIDDEN);
+    if (userId !== String(card.owner)) throw new ErrorForbidden(MESSAGE.FORBIDDEN);
 
     const removedCard = await Card.deleteOne({ _id: cardId });
 
@@ -64,7 +64,11 @@ export const createCard = async (
 
     res.send(card);
   } catch (err) {
-    next(err);
+    if ((err as Error).name === 'ValidationError') {
+      next(new ErrorReqData(MESSAGE.BAD_DATA));
+    } else {
+      next(err);
+    }
   }
 };
 

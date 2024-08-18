@@ -1,7 +1,7 @@
 import {
   ErrorAuth,
   ErrorNotFound,
-  ErrorResData,
+  ErrorReqData,
   ErrorServer,
   ErrorAlreadyExist,
   ErrorForbidden,
@@ -10,7 +10,7 @@ import {
 export type TCustomError =
   | ErrorAuth
   | ErrorNotFound
-  | ErrorResData
+  | ErrorReqData
   | ErrorServer
   | ErrorAlreadyExist
   | ErrorForbidden;

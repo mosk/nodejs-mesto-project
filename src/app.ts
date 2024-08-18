@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import { errors } from 'celebrate';
 import { ErrorNotFound } from './errors';
-import { ERROR_MSG } from './consts';
+import { MESSAGE } from './consts';
 import getAppConfig from '../config';
 import {
   auth, requestLogger, errorLogger, errorHandler,
@@ -28,12 +28,12 @@ app.use(auth);
 app.use('/', routesUsers);
 app.use('/', routesCards);
 
-app.get('*', (
+app.use('*', (
   _req: Request,
   _res: Response,
   next: NextFunction,
 ) => {
-  next(new ErrorNotFound(ERROR_MSG.NOT_FOUND));
+  next(new ErrorNotFound(MESSAGE.NOT_FOUND));
 });
 
 app.use(errorLogger);

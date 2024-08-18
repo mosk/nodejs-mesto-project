@@ -1,4 +1,6 @@
-const ERROR_MSG: Record<string, string> = {
+const MESSAGE: Record<string, string> = {
+  // 200
+  SUCCESS_AUTH: 'Авторизация прошла успешно',
   // 400
   BAD_USER_ID: 'Передан некорректный id пользователя',
   BAD_CARD_ID: 'Передан некорректный id карточки',
@@ -18,4 +20,4 @@ const ERROR_MSG: Record<string, string> = {
   DEFAULT: 'На сервере произошла ошибка',
 };
 
-export default ERROR_MSG;
+export default MESSAGE;

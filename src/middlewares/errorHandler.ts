@@ -5,7 +5,6 @@ const errorHandler = (
   err: TCustomError,
   req: Request,
   res: Response,
-  // eslint-disable-next-line no-unused-vars
   next: NextFunction,
 ) => {
   const { statusCode: status = 500, message: msg } = err;
@@ -15,6 +14,8 @@ const errorHandler = (
     status,
     message,
   });
+
+  next();
 };
 
 export default errorHandler;
