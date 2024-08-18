@@ -26,6 +26,7 @@ export const login = async (
       .cookie(COOKIE_NAME, token, {
         expires: new Date(Date.now() + COOKIE_TIMEOUT),
         httpOnly: true,
+        sameSite: true,
       })
       .send(MESSAGE.SUCCESS_AUTH);
   } catch (err) {
