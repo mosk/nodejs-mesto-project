@@ -24,16 +24,16 @@ app.use(requestLogger);
 
 app.use('/', routesAuth);
 
-// app.use(auth);
-app.use('/', auth, routesUsers);
-app.use('/', auth, routesCards);
+app.use(auth);
+app.use('/', routesUsers);
+app.use('/', routesCards);
 
 app.get('*', (
   _req: Request,
   _res: Response,
   next: NextFunction,
 ) => {
-  next(new ErrorNotFound(ERROR_MSG.FORBIDDEN));
+  next(new ErrorNotFound(ERROR_MSG.NOT_FOUND));
 });
 
 app.use(errorLogger);
