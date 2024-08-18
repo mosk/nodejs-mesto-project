@@ -1,22 +1,20 @@
-import type { NextFunction, Request, Response } from "express";
-import type { IUser } from "types";
+import type { NextFunction, Request, Response } from 'express';
+import type { IUser } from 'types';
 
-import mongoose from "mongoose";
-import jwt from "jsonwebtoken";
-import bcrypt from "bcryptjs";
-import { COOKIE_NAME, COOKIE_TIMEOUT, ERROR_MSG } from "../consts";
-import { sendError } from "../helpers";
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import { ErrorAlreadyExist } from 'errors';
+import { COOKIE_NAME, COOKIE_TIMEOUT, ERROR_MSG } from '../consts';
 
-import getAppConfig from "../../config";
-import { User } from "../models";
-import { ErrorAlreadyExist } from "errors";
+import getAppConfig from '../../config';
+import { User } from '../models';
 
 const { secretKey } = getAppConfig();
 
 export const login = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const { email, password }: IUser = req.body;
 
@@ -38,13 +36,15 @@ export const login = async (
 export const createUser = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const user: IUser = req.body;
 
   try {
     const hash = await bcrypt.hash(user.password, 10);
-    const { name, email, avatar, about } = await User.create({
+    const {
+      name, email, avatar, about,
+    } = await User.create({
       ...user,
       password: hash,
     });

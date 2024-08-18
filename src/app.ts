@@ -26,8 +26,6 @@ app.use("/", routesCards);
 
 app.use(errorLogger);
 app.use(errors());
-// errors handler
+app.use(errorHandler);
 
 app.listen(port);
-
-console.log(`\nServer is running on ${port}; \ndb - "${db}". \n`);

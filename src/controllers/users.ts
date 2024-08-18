@@ -1,21 +1,25 @@
-import type { NextFunction, Request, Response } from "express";
-import type { IUser } from "types";
+import type { NextFunction, Request, Response } from 'express';
+import type { IUser } from 'types';
 
-import mongoose from "mongoose";
-import { ERROR_MSG } from "../consts";
-import { ErrorNotFound, ErrorResData } from "errors";
+import mongoose from 'mongoose';
+import {
+  ErrorAuth, ErrorForbidden, ErrorNotFound, ErrorResData,
+} from 'errors';
+import { ERROR_MSG } from '../consts';
 
-import { User } from "../models";
+import { User } from '../models';
 
 export const getUserById = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const { userId } = req.body;
+  const { userId } = req.params;
+  const { _id: currentUserId } = res.locals.user;
 
-  if (!mongoose.isValidObjectId(userId))
-    next(new ErrorResData(ERROR_MSG.BAD_USER_ID));
+  if (userId !== currentUserId) next(new ErrorForbidden(ERROR_MSG.FORBIDDEN));
+
+  if (!mongoose.isValidObjectId(userId)) next(new ErrorResData(ERROR_MSG.BAD_USER_ID));
 
   try {
     const user = await User.findById(userId);
@@ -28,16 +32,14 @@ export const getUserById = async (
   }
 };
 
-// TODO: чекнуть
 export const getUserCurrent = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const { userId } = req.body;
+  const { _id: userId } = res.locals.user;
 
-  if (!mongoose.isValidObjectId(userId))
-    next(new ErrorResData(ERROR_MSG.BAD_USER_ID));
+  if (!mongoose.isValidObjectId(userId)) next(new ErrorResData(ERROR_MSG.BAD_USER_ID));
 
   try {
     const user = await User.findById(userId);
@@ -53,7 +55,7 @@ export const getUserCurrent = async (
 export const getAllUsers = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const users = await User.find({});
@@ -66,16 +68,12 @@ export const getAllUsers = async (
 export const updateUserProfile = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const {
-    id: userId,
-    name,
-    about,
-  }: Omit<IUser, "avatar"> & { id: string } = req.body;
+  const { name, about }: Omit<IUser, 'avatar'> = req.body;
+  const { _id: userId } = res.locals.user;
 
-  if (!mongoose.isValidObjectId(userId))
-    next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
+  if (!mongoose.isValidObjectId(userId)) next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
 
   try {
     const user = await User.findByIdAndUpdate(
@@ -86,7 +84,7 @@ export const updateUserProfile = async (
       },
       {
         new: true,
-      }
+      },
     );
 
     if (!user) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_USER);
@@ -100,13 +98,12 @@ export const updateUserProfile = async (
 export const updateUserAvatar = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const { id: userId, avatar }: Pick<IUser, "avatar"> & { id: string } =
-    req.body;
+  const { avatar }: Pick<IUser, 'avatar'> = req.body;
+  const { _id: userId } = res.locals.user;
 
-  if (!mongoose.isValidObjectId(userId))
-    next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
+  if (!mongoose.isValidObjectId(userId)) next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
 
   try {
     const user = await User.findByIdAndUpdate(
@@ -116,7 +113,7 @@ export const updateUserAvatar = async (
       },
       {
         new: true,
-      }
+      },
     );
 
     if (!user) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_USER);

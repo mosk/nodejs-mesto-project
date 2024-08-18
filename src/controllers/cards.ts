@@ -1,16 +1,16 @@
-import type { NextFunction, Request, Response } from "express";
-import type { ICard } from "types";
+import type { NextFunction, Request, Response } from 'express';
+import type { ICard } from 'types';
 
-import mongoose from "mongoose";
-import { ERROR_MSG } from "../consts";
-import { ErrorNotFound, ErrorResData } from "errors";
+import mongoose from 'mongoose';
+import { ErrorForbidden, ErrorNotFound, ErrorResData } from 'errors';
+import { ERROR_MSG } from '../consts';
 
-import { Card } from "../models";
+import { Card } from '../models';
 
 export const getAllCards = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const cards = await Card.find({});
@@ -23,17 +23,44 @@ export const getAllCards = async (
 export const deleteCard = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const { cardId } = req.body;
+  const { cardId } = req.params;
+  const { _id: userId } = res.locals.user;
 
-  if (!mongoose.isValidObjectId(cardId))
-    next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
+  if (!mongoose.isValidObjectId(cardId)) next(new ErrorResData(ERROR_MSG.BAD_CARD_ID));
 
   try {
-    const card = await Card.findByIdAndDelete(cardId);
+    const card = await Card.findById(cardId);
 
     if (!card) throw new ErrorNotFound(ERROR_MSG.NOT_FOUND_CARD);
+
+    if (userId !== card.owner) throw new ErrorForbidden(ERROR_MSG.FORBIDDEN);
+
+    const removedCard = await Card.deleteOne({ _id: cardId });
+
+    res.send(removedCard);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const createCard = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { name, link }: Pick<ICard, 'name' | 'link'> = req.body;
+  const { _id: userId } = res.locals.user;
+
+  try {
+    const card = await Card.create({
+      name,
+      link,
+      owner: userId,
+      likes: [],
+      createdAt: Date.now(),
+    });
 
     res.send(card);
   } catch (err) {
@@ -41,108 +68,44 @@ export const deleteCard = async (
   }
 };
 
-export const createCard = (req: Request, res: Response) => {
-  const id = (req as TRequestWithId).user._id;
-  const { name, link }: Pick<ICard, "name" | "link"> = req.body;
+export const likeCard = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { cardId } = req.params;
+  const { _id: userId } = res.locals.user;
 
-  if (!mongoose.isValidObjectId(id)) {
-    sendError(res, ERRORS.INCORRECT_USER_ID);
-    return;
+  try {
+    const card = await Card.findByIdAndUpdate(
+      cardId,
+      { $addToSet: { likes: userId } },
+      { new: true },
+    );
+
+    res.send(card);
+  } catch (err) {
+    next(err);
   }
-
-  if (name.length || link.length) {
-    sendError(res, ERRORS.INCORRECT_DATA);
-    return;
-  }
-
-  Card.create({
-    name,
-    link,
-    owner: id,
-    likes: [],
-    createdAt: Date.now(),
-  })
-    .then((card) => {
-      if (!card) {
-        sendError(res, ERRORS.INCORRECT_DATA);
-        return;
-      }
-
-      res.send(card);
-    })
-    .catch((err) => {
-      if (err instanceof mongoose.Error.ValidationError) {
-        sendError(res, {
-          ...ERRORS.INCORRECT_DATA,
-          message: `${ERRORS.INCORRECT_DATA}: ${err.message}`,
-        });
-      } else {
-        sendError(res, {
-          ...ERRORS.DEFAULT,
-          message: `${ERRORS.DEFAULT}: ${err.message}`,
-        });
-      }
-    });
 };
 
-export const likeCard = (req: Request, res: Response) => {
-  const id = (req as TRequestWithId).user._id;
+export const dislikeCard = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const { cardId } = req.params;
+  const { _id: userId } = res.locals.user;
 
-  if (!mongoose.isValidObjectId(id)) {
-    sendError(res, ERRORS.INCORRECT_USER_ID);
-    return;
-  }
-
-  if (!mongoose.isValidObjectId(cardId)) {
-    sendError(res, ERRORS.INCORRECT_CARD_ID);
-    return;
-  }
-
-  Card.findByIdAndUpdate(cardId, { $addToSet: { likes: id } }, { new: true })
-    .then((card) => {
-      if (!card) {
-        sendError(res, ERRORS.INCORRECT_DATA);
-        return;
-      }
-
-      res.send(card);
-    })
-    .catch((err) =>
-      sendError(res, {
-        ...ERRORS.DEFAULT,
-        message: `${ERRORS.DEFAULT}: ${err.message}`,
-      })
+  try {
+    const card = await Card.findByIdAndUpdate(
+      cardId,
+      { $pull: { likes: userId } },
+      { new: true },
     );
-};
 
-export const dislikeCard = (req: Request, res: Response) => {
-  const id = (req as TRequestWithId).user._id;
-  const { cardId } = req.params;
-
-  if (!mongoose.isValidObjectId(id)) {
-    sendError(res, ERRORS.INCORRECT_USER_ID);
-    return;
+    res.send(card);
+  } catch (err) {
+    next(err);
   }
-
-  if (!mongoose.isValidObjectId(cardId)) {
-    sendError(res, ERRORS.INCORRECT_CARD_ID);
-    return;
-  }
-
-  Card.findByIdAndUpdate(cardId, { $pull: { likes: id } }, { new: true })
-    .then((card) => {
-      if (!card) {
-        sendError(res, ERRORS.INCORRECT_DATA);
-        return;
-      }
-
-      res.send(card);
-    })
-    .catch((err) =>
-      sendError(res, {
-        ...ERRORS.DEFAULT,
-        message: `${ERRORS.DEFAULT}: ${err.message}`,
-      })
-    );
 };

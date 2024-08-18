@@ -4,17 +4,13 @@ import {
   ErrorResData,
   ErrorServer,
   ErrorAlreadyExist,
-} from "errors";
-
-// TODO: remove
-export interface ICustomError {
-  code: number;
-  message: string;
-}
+  ErrorForbidden,
+} from 'errors';
 
 export type TCustomError =
   | ErrorAuth
   | ErrorNotFound
   | ErrorResData
   | ErrorServer
-  | ErrorAlreadyExist;
+  | ErrorAlreadyExist
+  | ErrorForbidden;
